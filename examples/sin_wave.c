@@ -23,7 +23,10 @@ uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos,
 int main() {
   // Init the wav system with 2 channels (stereo), 44100Hz sample rate, 24 bit
   // depth. Defaults are 1, 8000, 16
-  wav_init(2, 44100, 24);
+  if (!wav_init(2, 44100, 24)) {
+    printf("wav_init error, quiting\n");
+    return 1;
+  }
 
   // Create a byte array for holding the audio buffer
   const size_t total_len = bytes_from_seconds(10);

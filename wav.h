@@ -54,6 +54,12 @@ bool wav_init(const int16_t __channels, const int32_t __sample_rate,
   channels = __channels;
   sample_rate = __sample_rate;
   bit_depth = __bit_depth;
+
+  // Make sure bit depth is a valid option
+  if (bit_depth != 16 && bit_depth != 24 && bit_depth != 32) {
+    printf("warning: recommended values for bit depth are [16, 24, 32]\n");
+    return false;
+  }
   return true;
 }
 
