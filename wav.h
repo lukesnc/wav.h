@@ -64,7 +64,26 @@ bool wav_init(const int16_t __channels, const int32_t __sample_rate,
 }
 
 void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
-  if (bit_depth > 16) {
+  if (bit_depth > 24) {
+    if (channels == 2) {
+      // Left channel
+      buffer[pos * 8] = (sample & 0xFF);           // Low byte
+      buffer[pos * 8 + 1] = (sample >> 8) & 0xFF;  // Second byte
+      buffer[pos * 8 + 2] = (sample >> 16) & 0xFF; // Third byte
+      buffer[pos * 8 + 3] = (sample >> 24) & 0xFF; // High byte
+
+      // Right channel
+      buffer[pos * 8 + 4] = (sample & 0xFF);       // Low byte
+      buffer[pos * 8 + 5] = (sample >> 8) & 0xFF;  // Second byte
+      buffer[pos * 8 + 6] = (sample >> 16) & 0xFF; // Third byte
+      buffer[pos * 8 + 7] = (sample >> 24) & 0xFF; // High byte
+    } else {
+      buffer[pos * 4] = (sample & 0xFF);           // Low byte
+      buffer[pos * 4 + 1] = (sample >> 8) & 0xFF;  // Second byte
+      buffer[pos * 4 + 2] = (sample >> 16) & 0xFF; // Third byte
+      buffer[pos * 4 + 3] = (sample >> 24) & 0xFF; // High byte
+    }
+  } else if (bit_depth > 16) {
     if (channels == 2) {
       // Left channel
       buffer[pos * 6] = (sample & 0xFF);           // Low byte
