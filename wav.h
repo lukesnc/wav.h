@@ -136,9 +136,9 @@ bool write_wav(const char *filename, const uint8_t *buffer,
                const uint32_t samples) {
   // Build header
   WavHeader header;
-  strncpy(header.riff, "RIFF", 4);
-  strncpy(header.description, "WAVE", 4);
-  strncpy(header.fmt, "fmt ", 4);
+  memcpy(header.riff, "RIFF", 4);
+  memcpy(header.description, "WAVE", 4);
+  memcpy(header.fmt, "fmt ", 4);
   header.chunk_size = 16;
   header.format = 1;
   header.channels = channels;
@@ -146,7 +146,7 @@ bool write_wav(const char *filename, const uint8_t *buffer,
   header.bytes_sec = sample_rate * channels * bit_depth / 8;
   header.bytes_samp = bit_depth / 8 * channels;
   header.bits_samp = bit_depth;
-  strncpy(header.data_header, "data", 4);
+  memcpy(header.data_header, "data", 4);
   header.data_size = samples * header.bytes_samp;
   header.file_size = header.data_size + header_size;
 
