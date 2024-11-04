@@ -28,29 +28,32 @@
 #include <string.h>
 
 // Lib context
-static int16_t channels = 1;
-static int32_t sample_rate = 8000;
-static int16_t bit_depth = 16;
+static uint16_t channels = 1;
+static uint32_t sample_rate = 8000;
+static uint16_t bit_depth = 16;
 
-typedef struct __attribute__((packed)) {
+#pragma pack(push, 1)
+typedef struct {
   char riff[4];
-  int32_t file_size;
-  char type[4];
+  uint32_t file_size;
+  char description[4];
   char fmt[4];
-  int32_t chunk_size;
-  int16_t format;
-  int16_t channels;
-  int32_t sample_rate;
-  int32_t bytes_sec;
-  int16_t bytes_samp;
-  int16_t bits_samp;
+  uint32_t chunk_size;
+  uint16_t format;
+  uint16_t channels;
+  uint32_t sample_rate;
+  uint32_t bytes_sec;
+  uint16_t bytes_samp;
+  uint16_t bits_samp;
   char data_header[4];
-  int32_t data_size;
+  uint32_t data_size;
 } WavHeader;
+#pragma pack(pop)
+
 const static uint32_t header_size = sizeof(WavHeader);
 
-bool wav_init(const int16_t __channels, const int32_t __sample_rate,
-              const int16_t __bit_depth) {
+bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
+              const uint16_t __bit_depth) {
   channels = __channels;
   sample_rate = __sample_rate;
   bit_depth = __bit_depth;
@@ -134,7 +137,7 @@ bool write_wav(const char *filename, const uint8_t *buffer,
   // Build header
   WavHeader header;
   strncpy(header.riff, "RIFF", 4);
-  strncpy(header.type, "WAVE", 4);
+  strncpy(header.description, "WAVE", 4);
   strncpy(header.fmt, "fmt ", 4);
   header.chunk_size = 16;
   header.format = 1;
@@ -152,6 +155,8 @@ bool write_wav(const char *filename, const uint8_t *buffer,
   fwrite(&header, 1, header_size, f);
   fwrite(buffer, 1, header.data_size, f);
   fclose(f);
+  printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024),
+         filename);
 
   return true;
 }
