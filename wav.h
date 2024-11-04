@@ -50,19 +50,23 @@ typedef struct {
 } WavHeader;
 #pragma pack(pop)
 
-const static uint32_t header_size = sizeof(WavHeader);
+static const uint32_t header_size = sizeof(WavHeader);
+
+static inline bool is_valid_bit_depth(const uint32_t n) {
+  return n == 16 || n == 24 || n == 32;
+}
 
 bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
               const uint16_t __bit_depth) {
+  if (!is_valid_bit_depth(__bit_depth)) {
+    printf("warning: recommended values for bit depth are [16, 24, 32]\n");
+    return false;
+  }
+
   channels = __channels;
   sample_rate = __sample_rate;
   bit_depth = __bit_depth;
 
-  // Make sure bit depth is a valid option
-  if (bit_depth != 16 && bit_depth != 24 && bit_depth != 32) {
-    printf("warning: recommended values for bit depth are [16, 24, 32]\n");
-    return false;
-  }
   return true;
 }
 
