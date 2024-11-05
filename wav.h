@@ -63,6 +63,7 @@ static inline bool is_valid_num_channels(const uint16_t n) {
 
 static inline bool is_valid_sample_rate(const uint32_t n) { return n > 0; }
 
+// Do this first to set global options
 bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
               const uint16_t __bit_depth) {
   if (!is_valid_num_channels(__channels)) {
@@ -85,10 +86,12 @@ bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
   return true;
 }
 
+// Write one audio sample into buffer[pos]
 void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
   switch (bit_depth) {
   case 32:
-    if (channels == 2) {
+    switch (channels) {
+    case 2:
       // Left channel
       buffer[pos * 8] = (sample & 0xFF);           // Low byte
       buffer[pos * 8 + 1] = (sample >> 8) & 0xFF;  // Second byte
@@ -100,15 +103,18 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
       buffer[pos * 8 + 5] = (sample >> 8) & 0xFF;  // Second byte
       buffer[pos * 8 + 6] = (sample >> 16) & 0xFF; // Third byte
       buffer[pos * 8 + 7] = (sample >> 24) & 0xFF; // High byte
-    } else {
+      break;
+    case 1:
       buffer[pos * 4] = (sample & 0xFF);           // Low byte
       buffer[pos * 4 + 1] = (sample >> 8) & 0xFF;  // Second byte
       buffer[pos * 4 + 2] = (sample >> 16) & 0xFF; // Third byte
       buffer[pos * 4 + 3] = (sample >> 24) & 0xFF; // High byte
+      break;
     }
     break;
   case 24:
-    if (channels == 2) {
+    switch (channels) {
+    case 2:
       // Left channel
       buffer[pos * 6] = (sample & 0xFF);           // Low byte
       buffer[pos * 6 + 1] = (sample >> 8) & 0xFF;  // Middle byte
@@ -118,14 +124,17 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
       buffer[pos * 6 + 3] = (sample & 0xFF);       // Low byte
       buffer[pos * 6 + 4] = (sample >> 8) & 0xFF;  // Middle byte
       buffer[pos * 6 + 5] = (sample >> 16) & 0xFF; // High byte
-    } else {
+      break;
+    case 1:
       buffer[pos * 3] = (sample & 0xFF);           // Low byte
       buffer[pos * 3 + 1] = (sample >> 8) & 0xFF;  // Middle byte
       buffer[pos * 3 + 2] = (sample >> 16) & 0xFF; // High byte
+      break;
     }
     break;
   case 16:
-    if (channels == 2) {
+    switch (channels) {
+    case 2:
       // Left channel
       buffer[pos * 4] = (sample & 0xFF);          // Low byte
       buffer[pos * 4 + 1] = (sample >> 8) & 0xFF; // High byte
@@ -133,36 +142,28 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
       // Right channel
       buffer[pos * 4 + 2] = (sample & 0xFF);      // Low byte
       buffer[pos * 4 + 3] = (sample >> 8) & 0xFF; // High byte
-    } else {
+      break;
+    case 1:
       buffer[pos * 2] = (sample & 0xFF);          // Low byte
       buffer[pos * 2 + 1] = (sample >> 8) & 0xFF; // High byte
+      break;
     }
     break;
   case 8:
-    if (channels == 2) {
+    switch (channels) {
+    case 2:
       buffer[pos * 2] = (int8_t)sample;     // Left channel
       buffer[pos * 2 + 1] = (int8_t)sample; // Right channel
-    } else {
-      buffer[pos] = (int8_t)sample;
+      break;
+    case 1:
+      buffer[pos] = (int8_t)sample; // Single channel (mono)
+      break;
     }
     break;
   }
 }
 
-uint32_t samples_from_seconds(const uint32_t seconds) {
-  return seconds * sample_rate;
-}
-
-uint32_t bytes_sample() { return bit_depth / 8 * channels; }
-
-uint32_t bytes_from_seconds(const uint32_t seconds) {
-  return seconds * sample_rate * (bit_depth / 8 * channels);
-}
-
-uint32_t bytes_from_samples(const uint32_t samples) {
-  return samples * (bit_depth / 8 * channels);
-}
-
+// Save audio buffer to {filename}.wav given buffer length in samples
 bool write_wav(const char *filename, const uint8_t *buffer,
                const uint32_t samples) {
   // Build header
@@ -190,6 +191,20 @@ bool write_wav(const char *filename, const uint8_t *buffer,
          filename);
 
   return true;
+}
+
+uint32_t samples_from_seconds(const uint32_t seconds) {
+  return seconds * sample_rate;
+}
+
+uint32_t bytes_sample() { return bit_depth / 8 * channels; }
+
+uint32_t bytes_from_seconds(const uint32_t seconds) {
+  return seconds * sample_rate * (bit_depth / 8 * channels);
+}
+
+uint32_t bytes_from_samples(const uint32_t samples) {
+  return samples * (bit_depth / 8 * channels);
 }
 
 #endif // WAV_H
