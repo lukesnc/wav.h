@@ -49,7 +49,6 @@ typedef struct {
   uint32_t data_size;
 } WavHeader;
 #pragma pack(pop)
-
 static const uint32_t header_size = sizeof(WavHeader);
 
 static inline bool is_valid_bit_depth(const uint16_t n) {
@@ -137,6 +136,14 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
     } else {
       buffer[pos * 2] = (sample & 0xFF);          // Low byte
       buffer[pos * 2 + 1] = (sample >> 8) & 0xFF; // High byte
+    }
+    break;
+  case 8:
+    if (channels == 2) {
+      buffer[pos * 2] = (int8_t)sample;     // Left channel
+      buffer[pos * 2 + 1] = (int8_t)sample; // Right channel
+    } else {
+      buffer[pos] = (int8_t)sample;
     }
     break;
   }
