@@ -46,7 +46,7 @@ int main() {
 
   // Write the buffer to a given filename that is n samples long (playhead in
   // this case)
-  write_wav("audio.wav", buffer, playhead);
+  write_wav_file("audio.wav", buffer, playhead);
 
   return 0;
 }

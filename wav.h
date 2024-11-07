@@ -49,7 +49,6 @@ typedef struct {
   uint32_t data_size;
 } WavHeader;
 #pragma pack(pop)
-static const uint32_t header_size = sizeof(WavHeader);
 
 static inline bool is_valid_bit_depth(const uint16_t n) {
   return n == 8 || n == 16 || n == 24 || n == 32;
@@ -164,8 +163,8 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
 }
 
 // Save audio buffer to {filename}.wav given buffer length in samples
-bool write_wav(const char *filename, const uint8_t *buffer,
-               const uint32_t samples) {
+bool write_wav_file(const char *filename, const uint8_t *buffer,
+                    const uint32_t samples) {
   // Build header
   WavHeader header;
   memcpy(header.riff, "RIFF", 4);
@@ -180,11 +179,11 @@ bool write_wav(const char *filename, const uint8_t *buffer,
   header.bits_samp = bit_depth;
   memcpy(header.data_header, "data", 4);
   header.data_size = samples * header.bytes_samp;
-  header.file_size = header.data_size + header_size;
+  header.file_size = header.data_size + sizeof(WavHeader);
 
   // Write file
   FILE *f = fopen(filename, "w");
-  fwrite(&header, 1, header_size, f);
+  fwrite(&header, 1, sizeof(WavHeader), f);
   fwrite(buffer, 1, header.data_size, f);
   fclose(f);
   printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024),
