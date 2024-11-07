@@ -15,7 +15,7 @@ uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos,
 
     // write_sample automatically handles differences writing in writing stereo
     // and varying bit depths
-    write_sample(buffer, start_pos + i, sample);
+    write_wav_sample(buffer, start_pos + i, sample);
   }
   return samples;
 }

@@ -55,7 +55,7 @@ static inline bool is_valid_bit_depth(const uint16_t n) {
 }
 
 // Not providing support for higher channel number than 2 right now as it breaks
-// write_sample()
+// write_wav_sample()
 static inline bool is_valid_num_channels(const uint16_t n) {
   return n == 1 || n == 2;
 }
@@ -86,7 +86,8 @@ bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
 }
 
 // Write one audio sample into buffer[pos]
-void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
+void write_wav_sample(uint8_t *buffer, const uint32_t pos,
+                      const int32_t sample) {
   switch (bit_depth) {
   case 32:
     switch (channels) {
