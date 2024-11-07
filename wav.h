@@ -162,7 +162,7 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
   }
 }
 
-void build_header(WavHeader *header, const uint32_t samples) {
+void build_wav_header(WavHeader *header, const uint32_t samples) {
   memcpy(header->riff, "RIFF", 4);
   memcpy(header->description, "WAVE", 4);
   memcpy(header->fmt, "fmt ", 4);
@@ -183,7 +183,7 @@ void write_wav_file(const char *filename, const uint8_t *buffer,
                     const uint32_t samples) {
   // Build header
   WavHeader header;
-  build_header(&header, samples);
+  build_wav_header(&header, samples);
 
   // Write file
   FILE *f = fopen(filename, "w");
