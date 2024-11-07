@@ -162,24 +162,28 @@ void write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
   }
 }
 
+void build_header(WavHeader *header, const uint32_t samples) {
+  memcpy(header->riff, "RIFF", 4);
+  memcpy(header->description, "WAVE", 4);
+  memcpy(header->fmt, "fmt ", 4);
+  header->chunk_size = 16;
+  header->format = 1;
+  header->channels = channels;
+  header->sample_rate = sample_rate;
+  header->bytes_sec = sample_rate * channels * bit_depth / 8;
+  header->bytes_samp = bit_depth / 8 * channels;
+  header->bits_samp = bit_depth;
+  memcpy(header->data_header, "data", 4);
+  header->data_size = samples * header->bytes_samp;
+  header->file_size = header->data_size + sizeof(WavHeader);
+}
+
 // Save audio buffer to {filename}.wav given buffer length in samples
-bool write_wav_file(const char *filename, const uint8_t *buffer,
+void write_wav_file(const char *filename, const uint8_t *buffer,
                     const uint32_t samples) {
   // Build header
   WavHeader header;
-  memcpy(header.riff, "RIFF", 4);
-  memcpy(header.description, "WAVE", 4);
-  memcpy(header.fmt, "fmt ", 4);
-  header.chunk_size = 16;
-  header.format = 1;
-  header.channels = channels;
-  header.sample_rate = sample_rate;
-  header.bytes_sec = sample_rate * channels * bit_depth / 8;
-  header.bytes_samp = bit_depth / 8 * channels;
-  header.bits_samp = bit_depth;
-  memcpy(header.data_header, "data", 4);
-  header.data_size = samples * header.bytes_samp;
-  header.file_size = header.data_size + sizeof(WavHeader);
+  build_header(&header, samples);
 
   // Write file
   FILE *f = fopen(filename, "w");
@@ -188,8 +192,6 @@ bool write_wav_file(const char *filename, const uint8_t *buffer,
   fclose(f);
   printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024),
          filename);
-
-  return true;
 }
 
 uint32_t samples_from_seconds(const uint32_t seconds) {
