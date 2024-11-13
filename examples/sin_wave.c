@@ -3,6 +3,7 @@
 // 0.5 seconds.
 
 #include "wav.h"
+#include <math.h>
 
 // The start_pos and samples represent the sample to start writing at in the
 // buffer and how many samples of sin wave to write (length)

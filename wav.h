@@ -21,7 +21,6 @@
 #ifndef WAV_H
 #define WAV_H
 
-#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
