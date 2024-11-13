@@ -179,7 +179,7 @@ void build_wav_header(WavHeader *header, const uint32_t samples) {
 }
 
 // Save audio buffer to {filename}.wav given buffer length in samples
-void write_wav_file(const char *filename, const uint8_t *buffer,
+bool write_wav_file(const char *filename, const uint8_t *buffer,
                     const uint32_t samples) {
   // Build header
   WavHeader header;
@@ -187,11 +187,17 @@ void write_wav_file(const char *filename, const uint8_t *buffer,
 
   // Write file
   FILE *f = fopen(filename, "w");
+  if (f == NULL) {
+    perror("error opening file");
+    return false;
+  }
+
   fwrite(&header, 1, sizeof(WavHeader), f);
   fwrite(buffer, 1, header.data_size, f);
   fclose(f);
   printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024),
          filename);
+  return true;
 }
 
 uint32_t samples_from_seconds(const uint32_t seconds) {
