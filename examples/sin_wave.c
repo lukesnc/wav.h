@@ -14,8 +14,8 @@ uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos,
     const double t = (double)(start_pos + i) / sample_rate;
     const int32_t sample = (int32_t)(amp * sin(2.0 * M_PI * freq * t));
 
-    // write_sample automatically handles differences writing in writing stereo
-    // and varying bit depths
+    // write_wav_sample automatically handles differences in writing
+    // stereo and varying bit depths
     write_wav_sample(buffer, start_pos + i, sample);
   }
   return samples;
