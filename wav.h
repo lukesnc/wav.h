@@ -65,15 +65,17 @@ static inline bool is_valid_sample_rate(const uint32_t n) { return n > 0; }
 bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
               const uint16_t __bit_depth) {
   if (!is_valid_num_channels(__channels)) {
-    fprintf(stderr, "error: number of channels should be 1 or 2\n");
+    fprintf(stderr, "wav_init error: number of channels should be 1 or 2\n");
     return false;
   }
   if (!is_valid_sample_rate(__sample_rate)) {
-    fprintf(stderr, "error: sample rate must be between 1 Hz and 4.3 GHz\n");
+    fprintf(stderr,
+            "wav_init error: sample rate must be between 1 Hz and 4.3 GHz\n");
     return false;
   }
   if (!is_valid_bit_depth(__bit_depth)) {
-    fprintf(stderr, "error: possible bit depth values are 8,16,24,32\n");
+    fprintf(stderr,
+            "wav_init error: possible bit depth values are 8,16,24,32\n");
     return false;
   }
 
