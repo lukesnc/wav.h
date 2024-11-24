@@ -206,13 +206,13 @@ uint32_t samples_from_seconds(const uint32_t seconds) {
   return seconds * sample_rate;
 }
 
-uint32_t bytes_sample() { return bit_depth / 8 * channels; }
+size_t bytes_sample() { return bit_depth / 8 * channels; }
 
-uint32_t bytes_from_seconds(const uint32_t seconds) {
+size_t bytes_from_seconds(const uint32_t seconds) {
   return seconds * sample_rate * (bit_depth / 8 * channels);
 }
 
-uint32_t bytes_from_samples(const uint32_t samples) {
+size_t bytes_from_samples(const uint32_t samples) {
   return samples * (bit_depth / 8 * channels);
 }
 
