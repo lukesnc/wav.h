@@ -27,9 +27,11 @@
 #include <string.h>
 
 // Lib context
-static uint16_t channels = 1;
-static uint32_t sample_rate = 8000;
-static uint16_t bit_depth = 16;
+static struct {
+    uint16_t channels;
+    uint32_t sample_rate;
+    uint16_t bit_depth;
+} wav_ctx;
 
 #pragma pack(push, 1)
 typedef struct {
@@ -62,28 +64,28 @@ static inline bool is_valid_num_channels(const uint16_t n) {
 static inline bool is_valid_sample_rate(const uint32_t n) { return n > 0; }
 
 // Do this first to set global options
-bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
-              const uint16_t __bit_depth) {
-    if (!is_valid_num_channels(__channels)) {
+bool wav_init(const uint16_t channels, const uint32_t sample_rate,
+              const uint16_t bit_depth) {
+    if (!is_valid_num_channels(channels)) {
         fprintf(stderr,
                 "wav_init error: number of channels should be 1 or 2\n");
         return false;
     }
-    if (!is_valid_sample_rate(__sample_rate)) {
+    if (!is_valid_sample_rate(sample_rate)) {
         fprintf(
             stderr,
             "wav_init error: sample rate must be between 1 Hz and 4.3 GHz\n");
         return false;
     }
-    if (!is_valid_bit_depth(__bit_depth)) {
+    if (!is_valid_bit_depth(bit_depth)) {
         fprintf(stderr,
                 "wav_init error: possible bit depth values are 8,16,24,32\n");
         return false;
     }
 
-    channels = __channels;
-    sample_rate = __sample_rate;
-    bit_depth = __bit_depth;
+    wav_ctx.channels = channels;
+    wav_ctx.sample_rate = sample_rate;
+    wav_ctx.bit_depth = bit_depth;
 
     return true;
 }
@@ -91,9 +93,9 @@ bool wav_init(const uint16_t __channels, const uint32_t __sample_rate,
 // Write one audio sample into buffer[pos]
 void write_wav_sample(uint8_t *buffer, const uint32_t pos,
                       const int32_t sample) {
-    switch (bit_depth) {
+    switch (wav_ctx.bit_depth) {
     case 32:
-        switch (channels) {
+        switch (wav_ctx.channels) {
         case 2:
             // Left channel
             buffer[pos * 8] = (sample & 0xFF);           // Low byte
@@ -116,7 +118,7 @@ void write_wav_sample(uint8_t *buffer, const uint32_t pos,
         }
         break;
     case 24:
-        switch (channels) {
+        switch (wav_ctx.channels) {
         case 2:
             // Left channel
             buffer[pos * 6] = (sample & 0xFF);           // Low byte
@@ -136,7 +138,7 @@ void write_wav_sample(uint8_t *buffer, const uint32_t pos,
         }
         break;
     case 16:
-        switch (channels) {
+        switch (wav_ctx.channels) {
         case 2:
             // Left channel
             buffer[pos * 4] = (sample & 0xFF);          // Low byte
@@ -153,7 +155,7 @@ void write_wav_sample(uint8_t *buffer, const uint32_t pos,
         }
         break;
     case 8:
-        switch (channels) {
+        switch (wav_ctx.channels) {
         case 2:
             buffer[pos * 2] = (int8_t)sample;     // Left channel
             buffer[pos * 2 + 1] = (int8_t)sample; // Right channel
@@ -172,11 +174,12 @@ void build_wav_header(WavHeader *header, const uint32_t samples) {
     memcpy(header->fmt, "fmt ", 4);
     header->chunk_size = 16;
     header->format = 1;
-    header->channels = channels;
-    header->sample_rate = sample_rate;
-    header->bytes_sec = sample_rate * channels * bit_depth / 8;
-    header->bytes_samp = bit_depth / 8 * channels;
-    header->bits_samp = bit_depth;
+    header->channels = wav_ctx.channels;
+    header->sample_rate = wav_ctx.sample_rate;
+    header->bytes_sec =
+        wav_ctx.sample_rate * wav_ctx.channels * wav_ctx.bit_depth / 8;
+    header->bytes_samp = wav_ctx.bit_depth / 8 * wav_ctx.channels;
+    header->bits_samp = wav_ctx.bit_depth;
     memcpy(header->data_header, "data", 4);
     header->data_size = samples * header->bytes_samp;
     header->file_size = header->data_size + sizeof(WavHeader);
@@ -205,17 +208,18 @@ bool write_wav_file(const char *filename, const uint8_t *buffer,
 }
 
 uint32_t samples_from_seconds(const uint32_t seconds) {
-    return seconds * sample_rate;
+    return seconds * wav_ctx.sample_rate;
 }
 
-size_t bytes_sample() { return bit_depth / 8 * channels; }
+size_t bytes_sample() { return wav_ctx.bit_depth / 8 * wav_ctx.channels; }
 
 size_t bytes_from_seconds(const uint32_t seconds) {
-    return seconds * sample_rate * (bit_depth / 8 * channels);
+    return seconds * wav_ctx.sample_rate *
+           (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
 size_t bytes_from_samples(const uint32_t samples) {
-    return samples * (bit_depth / 8 * channels);
+    return samples * (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
 #endif // WAV_H
