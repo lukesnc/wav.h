@@ -2,6 +2,8 @@
 
 This library is meant to be a dead simple header-only C library for working with audio buffers and files in WAV format. Has support for stereo, custom sample rate, up to 32 bit depth.
 
+Just download [wav.h](https://raw.githubusercontent.com/lukesnc/wav.h/refs/heads/main/wav.h) to use in your project.
+
 ## Basic Example
 
 ```c
