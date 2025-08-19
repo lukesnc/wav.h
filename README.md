@@ -1,4 +1,4 @@
-# WAV Files in C
+# wav.h - WAV Files in C
 
 This library is meant to be a dead simple header-only C library for working with audio buffers and files in WAV format. Has support for stereo, custom sample rate, up to 32 bit depth.
 
@@ -41,3 +41,4 @@ Also check out the [`examples/`](./examples/) folder.
 ## Resources
 
 - <https://docs.fileformat.com/audio/wav/>
+- <https://github.com/tsoding/nob.h>
