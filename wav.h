@@ -51,34 +51,34 @@ typedef struct {
 } WavHeader;
 #pragma pack(pop)
 
-static inline bool is_valid_bit_depth(const uint16_t n) {
+static inline bool wav_is_valid_bit_depth(const uint16_t n) {
     return n == 8 || n == 16 || n == 24 || n == 32;
 }
 
 // Not providing support for higher channel number than 2 right now as it breaks
 // write_wav_sample()
-static inline bool is_valid_num_channels(const uint16_t n) {
+static inline bool wav_is_valid_num_channels(const uint16_t n) {
     return n == 1 || n == 2;
 }
 
 // Size of uint32 implicitly checks the upper bound of 4.3 GHz
-static inline bool is_valid_sample_rate(const uint32_t n) { return n > 0; }
+static inline bool wav_is_valid_sample_rate(const uint32_t n) { return n > 0; }
 
 // Do this first to set global options
 bool wav_init(const uint16_t channels, const uint32_t sample_rate,
               const uint16_t bit_depth) {
-    if (!is_valid_num_channels(channels)) {
+    if (!wav_is_valid_num_channels(channels)) {
         fprintf(stderr,
                 "wav_init error: number of channels should be 1 or 2\n");
         return false;
     }
-    if (!is_valid_sample_rate(sample_rate)) {
+    if (!wav_is_valid_sample_rate(sample_rate)) {
         fprintf(
             stderr,
             "wav_init error: sample rate must be between 1 Hz and 4.3 GHz\n");
         return false;
     }
-    if (!is_valid_bit_depth(bit_depth)) {
+    if (!wav_is_valid_bit_depth(bit_depth)) {
         fprintf(stderr,
                 "wav_init error: possible bit depth values are 8,16,24,32\n");
         return false;
@@ -92,7 +92,7 @@ bool wav_init(const uint16_t channels, const uint32_t sample_rate,
 }
 
 // Write one audio sample into buffer[pos]
-void write_wav_sample(uint8_t *buffer, const uint32_t pos,
+void wav_write_sample(uint8_t *buffer, const uint32_t pos,
                       const int32_t sample) {
     switch (wav_ctx.bit_depth) {
     case 32:
@@ -169,7 +169,7 @@ void write_wav_sample(uint8_t *buffer, const uint32_t pos,
     }
 }
 
-void build_wav_header(WavHeader *header, const uint32_t samples) {
+void wav_build_header(WavHeader *header, const uint32_t samples) {
     memcpy(header->riff, "RIFF", 4);
     memcpy(header->description, "WAVE", 4);
     memcpy(header->fmt, "fmt ", 4);
@@ -187,11 +187,11 @@ void build_wav_header(WavHeader *header, const uint32_t samples) {
 }
 
 // Save audio buffer to {filename}.wav given buffer length in samples
-bool write_wav_file(const char *filename, const uint8_t *buffer,
+bool wav_write_file(const char *filename, const uint8_t *buffer,
                     const uint32_t samples) {
     // Build header
     WavHeader header;
-    build_wav_header(&header, samples);
+    wav_build_header(&header, samples);
 
     // Write file
     FILE *f = fopen(filename, "wb");
@@ -208,18 +208,20 @@ bool write_wav_file(const char *filename, const uint8_t *buffer,
     return true;
 }
 
-uint32_t samples_from_seconds(const uint32_t seconds) {
+uint32_t wav_samples_from_seconds(const uint32_t seconds) {
     return seconds * wav_ctx.sample_rate;
 }
 
-size_t bytes_sample() { return wav_ctx.bit_depth / 8 * wav_ctx.channels; }
+size_t wav_bytes_per_sample() {
+    return wav_ctx.bit_depth / 8 * wav_ctx.channels;
+}
 
-size_t bytes_from_seconds(const uint32_t seconds) {
+size_t wav_bytes_from_seconds(const uint32_t seconds) {
     return seconds * wav_ctx.sample_rate *
            (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
-size_t bytes_from_samples(const uint32_t samples) {
+size_t wav_bytes_from_samples(const uint32_t samples) {
     return samples * (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
