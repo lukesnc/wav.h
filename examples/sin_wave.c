@@ -2,7 +2,7 @@
 // The first one plays 260hz for 0.5 seconds then immediately plays 500hz for
 // 0.5 seconds.
 
-#include "wav.h"
+#include "../wav.h"
 #include <math.h>
 
 #define CHANNELS (2)
@@ -20,7 +20,7 @@ uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos,
 
         // write_wav_sample automatically handles differences in writing
         // stereo and varying bit depths
-        write_wav_sample(buffer, start_pos + i, sample);
+        wav_write_sample(buffer, start_pos + i, sample);
     }
     return samples;
 }
@@ -34,7 +34,7 @@ int main() {
     }
 
     // Create a byte array for holding the audio buffer
-    const size_t total_len = bytes_from_seconds(10);
+    const size_t total_len = wav_bytes_from_seconds(10);
     uint8_t buffer[total_len] = {};
 
     // Track how many samples you've written with a playhead
@@ -51,7 +51,7 @@ int main() {
 
     // Write the buffer to a given filename that is n samples long (playhead in
     // this case)
-    write_wav_file("audio.wav", buffer, playhead);
+    wav_write_file("audio.wav", buffer, playhead);
 
     return 0;
 }
