@@ -2,7 +2,9 @@
 // The first one plays 260hz for 0.5 seconds then immediately plays 500hz for
 // 0.5 seconds.
 
+#define WAV_IMPLEMENTATION
 #include "../wav.h"
+
 #include <math.h>
 
 #define CHANNELS (2)
@@ -11,9 +13,8 @@
 
 // The start_pos and samples represent the sample to start writing at in the
 // buffer and how many samples of sin wave to write (length)
-uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos,
-                  const uint32_t samples, const double freq,
-                  const int32_t amp) {
+uint32_t sin_wave(uint8_t *buffer, const uint32_t start_pos, const uint32_t samples,
+                  const double freq, const int32_t amp) {
     for (uint32_t i = 0; i < samples; i++) {
         const double t = (double)(start_pos + i) / SAMPLE_RATE;
         const int32_t sample = (int32_t)(amp * sin(2.0 * M_PI * freq * t));

@@ -1,3 +1,4 @@
+#define WAV_IMPLEMENTATION
 #include "../wav.h"
 
 #define CHANNELS (2)
@@ -23,4 +24,6 @@ int main() {
 
     // Write to file
     wav_write_file("audio.wav", buffer, samples_to_write);
+
+    return 0;
 }

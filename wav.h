@@ -26,13 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Lib context
-static struct {
-    uint16_t channels;
-    uint32_t sample_rate;
-    uint16_t bit_depth;
-} wav_ctx;
-
 #pragma pack(push, 1)
 typedef struct {
     char riff[4];
@@ -51,6 +44,26 @@ typedef struct {
 } WavHeader;
 #pragma pack(pop)
 
+bool wav_init(const uint16_t channels, const uint32_t sample_rate, const uint16_t bit_depth);
+void wav_write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample);
+void wav_build_header(WavHeader *header, const uint32_t samples);
+bool wav_write_file(const char *filename, const uint8_t *buffer, const uint32_t samples);
+
+uint32_t wav_samples_from_seconds(const uint32_t seconds);
+size_t wav_bytes_per_sample();
+size_t wav_bytes_from_seconds(const uint32_t seconds);
+size_t wav_bytes_from_samples(const uint32_t samples);
+
+#endif // WAV_H
+
+#ifdef WAV_IMPLEMENTATION
+
+static struct {
+    uint16_t channels;
+    uint32_t sample_rate;
+    uint16_t bit_depth;
+} wav_ctx;
+
 static inline bool wav_is_valid_bit_depth(const uint16_t n) {
     return n == 8 || n == 16 || n == 24 || n == 32;
 }
@@ -65,22 +78,17 @@ static inline bool wav_is_valid_num_channels(const uint16_t n) {
 static inline bool wav_is_valid_sample_rate(const uint32_t n) { return n > 0; }
 
 // Do this first to set global options
-bool wav_init(const uint16_t channels, const uint32_t sample_rate,
-              const uint16_t bit_depth) {
+bool wav_init(const uint16_t channels, const uint32_t sample_rate, const uint16_t bit_depth) {
     if (!wav_is_valid_num_channels(channels)) {
-        fprintf(stderr,
-                "wav_init error: number of channels should be 1 or 2\n");
+        fprintf(stderr, "wav_init error: number of channels should be 1 or 2\n");
         return false;
     }
     if (!wav_is_valid_sample_rate(sample_rate)) {
-        fprintf(
-            stderr,
-            "wav_init error: sample rate must be between 1 Hz and 4.3 GHz\n");
+        fprintf(stderr, "wav_init error: sample rate must be between 1 Hz and 4.3 GHz\n");
         return false;
     }
     if (!wav_is_valid_bit_depth(bit_depth)) {
-        fprintf(stderr,
-                "wav_init error: possible bit depth values are 8,16,24,32\n");
+        fprintf(stderr, "wav_init error: possible bit depth values are 8,16,24,32\n");
         return false;
     }
 
@@ -92,8 +100,7 @@ bool wav_init(const uint16_t channels, const uint32_t sample_rate,
 }
 
 // Write one audio sample into buffer[pos]
-void wav_write_sample(uint8_t *buffer, const uint32_t pos,
-                      const int32_t sample) {
+void wav_write_sample(uint8_t *buffer, const uint32_t pos, const int32_t sample) {
     switch (wav_ctx.bit_depth) {
     case 32:
         switch (wav_ctx.channels) {
@@ -177,8 +184,7 @@ void wav_build_header(WavHeader *header, const uint32_t samples) {
     header->format = 1;
     header->channels = wav_ctx.channels;
     header->sample_rate = wav_ctx.sample_rate;
-    header->bytes_sec =
-        wav_ctx.sample_rate * wav_ctx.channels * wav_ctx.bit_depth / 8;
+    header->bytes_sec = wav_ctx.sample_rate * wav_ctx.channels * wav_ctx.bit_depth / 8;
     header->bytes_samp = wav_ctx.bit_depth / 8 * wav_ctx.channels;
     header->bits_samp = wav_ctx.bit_depth;
     memcpy(header->data_header, "data", 4);
@@ -187,8 +193,7 @@ void wav_build_header(WavHeader *header, const uint32_t samples) {
 }
 
 // Save audio buffer to {filename}.wav given buffer length in samples
-bool wav_write_file(const char *filename, const uint8_t *buffer,
-                    const uint32_t samples) {
+bool wav_write_file(const char *filename, const uint8_t *buffer, const uint32_t samples) {
     // Build header
     WavHeader header;
     wav_build_header(&header, samples);
@@ -203,8 +208,7 @@ bool wav_write_file(const char *filename, const uint8_t *buffer,
     fwrite(&header, 1, sizeof(WavHeader), f);
     fwrite(buffer, 1, header.data_size, f);
     fclose(f);
-    printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024),
-           filename);
+    printf("Wrote %.2f MB to %s\n", (double)header.data_size / (1024 * 1024), filename);
     return true;
 }
 
@@ -217,12 +221,11 @@ size_t wav_bytes_per_sample() {
 }
 
 size_t wav_bytes_from_seconds(const uint32_t seconds) {
-    return seconds * wav_ctx.sample_rate *
-           (wav_ctx.bit_depth / 8 * wav_ctx.channels);
+    return seconds * wav_ctx.sample_rate * (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
 size_t wav_bytes_from_samples(const uint32_t samples) {
     return samples * (wav_ctx.bit_depth / 8 * wav_ctx.channels);
 }
 
-#endif // WAV_H
+#endif // WAV_IMPLEMENTATION

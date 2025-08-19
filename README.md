@@ -7,6 +7,7 @@ Just download [wav.h](https://raw.githubusercontent.com/lukesnc/wav.h/refs/heads
 ## Basic Example
 
 ```c
+#define WAV_IMPLEMENTATION
 #include "wav.h"
 
 #define CHANNELS (2)
